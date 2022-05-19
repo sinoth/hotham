@@ -17,6 +17,7 @@ pub use audio::audio_system;
 pub use collision::collision_system;
 pub use draw_gui::draw_gui_system;
 pub use grabbing::grabbing_system;
+pub use grabbing::calibration_system;
 pub use hands::hands_system;
 pub use pointers::pointers_system;
 pub use rendering::rendering_system;
@@ -39,7 +40,9 @@ pub struct Queries<'a> {
     pub collision_query: PreparedQuery<&'a mut Collider>,
     pub draw_gui_query: PreparedQuery<&'a mut Panel>,
     pub grabbing_query: PreparedQuery<(&'a mut Hand, &'a Collider)>,
-    pub hands_query: PreparedQuery<(&'a mut Hand, &'a mut AnimationController, &'a mut RigidBody)>,
+    pub hands_query: PreparedQuery<(&'a mut Hand, Option<&'a mut AnimationController>, &'a mut RigidBody)>,
+    //pub hands_query: PreparedQuery<(&'a mut Hand, &'a mut AnimationController, &'a mut RigidBody)>,
+    //pub hands_query: PreparedQuery<(&'a mut Hand, &'a mut RigidBody)>,
     pub joints_query: PreparedQuery<(&'a TransformMatrix, &'a Joint, &'a Info)>,
     pub meshes_query: PreparedQuery<(&'a mut Mesh, &'a Skin)>,
     pub parent_query: PreparedQuery<&'a Parent>,

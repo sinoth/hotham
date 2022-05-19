@@ -8,7 +8,7 @@ use hotham::{
         begin_frame, begin_pbr_renderpass, end_frame, end_pbr_renderpass, physics_step,
     },
     systems::{
-        animation_system, collision_system, grabbing_system, hands::add_hand, hands_system,
+        animation_system, collision_system, grabbing_system, calibration_system, hands::add_hand, hands_system,
         rendering::rendering_system, skinning::skinning_system,
         update_parent_transform_matrix_system, update_rigid_body_transforms_system,
         update_transform_matrix_system, Queries,
@@ -44,40 +44,49 @@ fn init(engine: &mut Engine) -> Result<World, hotham::HothamError> {
     let glb_bufs: Vec<&[u8]> = vec![
         include_bytes!("../../../test_assets/left_hand.glb"),
         include_bytes!("../../../test_assets/right_hand.glb"),
-        include_bytes!("../../../test_assets/damaged_helmet.glb"),
+        include_bytes!("../../../test_assets/gizmo.glb"),
+        include_bytes!("../../../test_assets/cube.glb"),
     ];
     let models = gltf_loader::load_models_from_glb(
         &glb_bufs,
         vulkan_context,
         &render_context.descriptor_set_layouts,
     )?;
-    add_helmet(
-        &models,
-        &mut world,
-        vulkan_context,
-        render_context,
-        physics_context,
-    );
     add_hand(
         &models,
+        "Left Hand",
         Handedness::Left,
         &mut world,
         vulkan_context,
         render_context,
         physics_context,
+        false,
     );
     add_hand(
         &models,
+        "Right Hand",
         Handedness::Right,
         &mut world,
         vulkan_context,
         render_context,
         physics_context,
+        false,
+    );
+    add_hand(
+        &models,
+        "Gizmo",
+        Handedness::Right,
+        &mut world,
+        vulkan_context,
+        render_context,
+        physics_context,
+        true,
     );
 
     Ok(world)
 }
 
+/*
 fn add_helmet(
     models: &std::collections::HashMap<String, World>,
     world: &mut World,
@@ -105,6 +114,7 @@ fn add_helmet(
     let components = physics_context.get_rigid_body_and_collider(helmet, rigid_body, collider);
     world.insert(helmet, components).unwrap();
 }
+*/
 
 fn tick(engine: &mut Engine, world: &mut World, queries: &mut Queries) {
     let xr_context = &mut engine.xr_context;
@@ -116,7 +126,8 @@ fn tick(engine: &mut Engine, world: &mut World, queries: &mut Queries) {
     hands_system(&mut queries.hands_query, world, xr_context, physics_context);
     physics_step(physics_context);
     collision_system(&mut queries.collision_query, world, physics_context);
-    grabbing_system(&mut queries.grabbing_query, world, physics_context);
+    //grabbing_system(&mut queries.grabbing_query, world, physics_context);
+    calibration_system(&mut queries.grabbing_query, world);
     update_rigid_body_transforms_system(
         &mut queries.update_rigid_body_transforms_query,
         world,

@@ -6,6 +6,23 @@ use crate::{
     resources::PhysicsContext,
 };
 
+pub fn calibration_system(
+    query: &mut PreparedQuery<(&mut Hand, &Collider)>,
+    world: &mut World,
+) {
+    for (_, (hand, _)) in query.query(world).iter() {
+        if hand.debug_hand {
+            return;
+        }
+        if hand.grip_value >= 1.0 {
+            if !hand.calibration_mode {
+                hand.begin_calibration();
+            }
+        } else {
+            hand.end_calibration();
+        }
+    }
+}
 /// Grabbing system
 /// Used to allow a player to grab objects. Used in conjunction with `hands_system`
 pub fn grabbing_system(
@@ -81,11 +98,7 @@ mod tests {
         world.insert(grabbed_entity, components).unwrap();
 
         // Fully gripped hand
-        let hand = Hand {
-            handedness: Handedness::Left,
-            grip_value: 1.0,
-            grabbed_entity: None,
-        };
+        let hand = Hand::new(Handedness::Left);
 
         // Collider
         let hand_collider = ColliderBuilder::cuboid(1.0, 1.0, 1.0).build();

@@ -1,4 +1,5 @@
 use hecs::Entity;
+use nalgebra::Isometry3;
 
 /// A component that represents the "side" or "handedness" that an entity is on
 /// Used by components such as `Hand` and `Pointer` to identify which controller they should map to
@@ -21,24 +22,38 @@ pub struct Hand {
     pub handedness: Handedness,
     /// Have we grabbed something?
     pub grabbed_entity: Option<Entity>,
+    /// Offset isometry to adjust 3D model
+    pub offset: Isometry3<f32>,
+    /// Are we in calibration mode?
+    pub calibration_mode: bool,
+    /// snarf
+    pub needs_snapshot: bool,
+    pub debug_hand: bool,
+    /// Snapshot used for calibration
+    pub calibration_snapshot: Isometry3<f32>,
 }
 
 impl Hand {
-    /// Shortcut helper to create a Left hand
-    pub fn left() -> Hand {
+    /// Simple constructor given only the handedness
+    pub fn new(handedness: Handedness) -> Self {
         Hand {
             grip_value: 0.0,
-            handedness: Handedness::Left,
+            handedness,
             grabbed_entity: None,
+            offset: Isometry3::identity(),
+            calibration_mode: false,
+            needs_snapshot: false,
+            debug_hand: false,
+            calibration_snapshot: Isometry3::identity(),
         }
     }
 
-    /// Shortcut helper to create a right hand
-    pub fn right() -> Hand {
-        Hand {
-            grip_value: 0.0,
-            handedness: Handedness::Right,
-            grabbed_entity: None,
-        }
+    pub fn begin_calibration(&mut self) -> () {
+        self.calibration_mode = true;
+        self.needs_snapshot = true;
+    }
+
+    pub fn end_calibration(&mut self) -> () {
+        self.calibration_mode = false;
     }
 }
