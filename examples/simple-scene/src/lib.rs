@@ -60,7 +60,9 @@ fn init(engine: &mut Engine) -> Result<World, hotham::HothamError> {
         vulkan_context,
         render_context,
         physics_context,
+        None,
         false,
+        false
     );
     add_hand(
         &models,
@@ -70,6 +72,8 @@ fn init(engine: &mut Engine) -> Result<World, hotham::HothamError> {
         vulkan_context,
         render_context,
         physics_context,
+        None,
+        false,
         false,
     );
     add_hand(
@@ -80,8 +84,35 @@ fn init(engine: &mut Engine) -> Result<World, hotham::HothamError> {
         vulkan_context,
         render_context,
         physics_context,
+        None,
         true,
+        false
     );
+    add_hand(
+        &models,
+        "Gizmo",
+        Handedness::Left,
+        &mut world,
+        vulkan_context,
+        render_context,
+        physics_context,
+        None,
+        true,
+        false
+    );
+    /*
+    add_hand(
+        &models,
+        "Gizmo",
+        Handedness::Right,
+        &mut world,
+        vulkan_context,
+        render_context,
+        physics_context,
+        true,
+        true
+    );
+    */
 
     Ok(world)
 }

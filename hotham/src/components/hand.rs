@@ -31,6 +31,7 @@ pub struct Hand {
     pub debug_hand: bool,
     /// Snapshot used for calibration
     pub calibration_snapshot: Isometry3<f32>,
+    pub aim_pose: bool,
 }
 
 impl Hand {
@@ -45,6 +46,7 @@ impl Hand {
             needs_snapshot: false,
             debug_hand: false,
             calibration_snapshot: Isometry3::identity(),
+            aim_pose: false,
         }
     }
 

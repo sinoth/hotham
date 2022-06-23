@@ -156,7 +156,7 @@ impl XrContext {
             Posef::IDENTITY,
         )?;
         let right_pointer_space =
-            aim_action.create_space(session.clone(), left_hand_subaction_path, Posef::IDENTITY)?;
+            aim_action.create_space(session.clone(), right_hand_subaction_path, Posef::IDENTITY)?;
 
         let frame_state = FrameState {
             predicted_display_time: Time::from_nanos(0),

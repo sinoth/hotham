@@ -6,6 +6,7 @@ use crate::{
 };
 use hecs::{PreparedQuery, World};
 use rapier3d::prelude::{ActiveCollisionTypes, ActiveEvents, ColliderBuilder, RigidBodyBuilder};
+use nalgebra::Isometry3;
 
 /// Hands system
 /// Used to allow users to interact with objects using their controllers as representations of their hands
@@ -23,10 +24,17 @@ pub fn hands_system(
                 &xr_context.left_hand_space,
                 xr_context.left_hand_subaction_path,
             ),
-            Handedness::Right => (
-                &xr_context.right_hand_space,
-                xr_context.right_hand_subaction_path,
-            ),
+            Handedness::Right =>
+                match hand.aim_pose {
+                    true => (
+                        &xr_context.right_pointer_space,
+                        xr_context.right_hand_subaction_path,
+                    ),
+                    false => (
+                        &xr_context.right_hand_space,
+                        xr_context.right_hand_subaction_path,
+                    )
+                },
         };
 
         // Locate the hand in the space.
@@ -53,9 +61,21 @@ pub fn hands_system(
                 .current_state;
 
         // Print the offset if we are releasing grip
-        /*if hand.grip_value > 0.0 && trigger_value <= 0.0 {
-           println!("[SIN] Offset: {}", hand.offset);
-        }*/
+        if hand.grip_value > 0.0 && trigger_value <= 0.0 && !hand.debug_hand{
+           //println!("[SIN] Offset: {}", hand.offset);
+           println!("[SIN] Offset translation: {}", hand.offset.translation);
+           println!("[SIN] Offset rotation: {}", hand.offset.rotation);
+           println!("[SIN] Offset quaternion: ({}, {}, {}, {})",
+                hand.offset.rotation.coords.x,
+                hand.offset.rotation.coords.y,
+                hand.offset.rotation.coords.z,
+                hand.offset.rotation.coords.w);
+           let euler = hand.offset.rotation.euler_angles();
+           println!("[SIN] Offset angles (roll, pitch, yaw): ({}, {}, {})",
+                euler.0 * 180.0 * std::f32::consts::PI,
+                euler.1 * 180.0 * std::f32::consts::PI,
+                euler.2 * 180.0 * std::f32::consts::PI);
+        }
 
         // Apply to Hand
         hand.grip_value = trigger_value;
@@ -98,7 +118,9 @@ pub fn add_hand(
     vulkan_context: &VulkanContext,
     render_context: &RenderContext,
     physics_context: &mut PhysicsContext,
+    offset: Option<Isometry3<f32>>,
     debug_hand: bool,
+    aim_pose: bool,
 ) {
     let hand = add_model_to_world(
         model_name,
@@ -120,6 +142,7 @@ pub fn add_hand(
 
         if let Ok(mut hand_struct) = world.get_mut::<Hand>(hand) {
             hand_struct.debug_hand = debug_hand;
+            hand_struct.aim_pose = aim_pose;
         }
 
         // Modify the animation controller
